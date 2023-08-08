@@ -1,8 +1,8 @@
 from pprint import pprint
-
+import os
 from googleapiclient.discovery import build
 
-api_key = 'AIzaSyD9d4i71QB2l2I8xNmVslTS5Tf7wpV1tPQ'
+api_key: str = os.getenv('API_KEY')
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 
