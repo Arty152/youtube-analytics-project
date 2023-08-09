@@ -1,9 +1,8 @@
 from pprint import pprint
 import os
+import json
 from googleapiclient.discovery import build
 
-api_key: str = os.getenv('API_KEY')
-youtube = build('youtube', 'v3', developerKey=api_key)
 
 
 class Channel:
@@ -12,7 +11,10 @@ class Channel:
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.channel_id = channel_id
+        api_key: str = os.getenv('API_KEY')
+        self.youtube = build('youtube', 'v3', developerKey=api_key)
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
-        pprint(youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute())
+        pprint(json.dumps(self.youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute()))
+
