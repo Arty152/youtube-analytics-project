@@ -3,16 +3,14 @@ import json
 from googleapiclient.discovery import build
 
 
-
 class Channel:
     """Класс для ютуб-канала"""
     api_key: str = os.getenv('API_KEY')
-    youtube = build('youtube', 'v3', developerKey=api_key)
-    attribute_values = []
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.channel_id = channel_id
+        self.youtube = build('youtube', 'v3', developerKey=self.api_key)
         self.channel = self.youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute()
         self.title = self.channel['items'][0]['snippet']['title']
         self.description = self.channel['items'][0]['snippet']['description']
@@ -28,12 +26,20 @@ class Channel:
     @classmethod
     def get_service(cls):
         """Возвращает объект для работы с YouTube API"""
-        return cls.youtube
+        service = build('youtube', 'v3', developerKey=cls.api_key)
+        return service
 
-    def to_json(self, data: str) -> None:
+    def to_json(self, file_name: str) -> None:
         """Сохраняет в файл значения атрибутов экземпляра `Channel`"""
-        self.attribute_values.append((self.title, self.description, self.url,
-                                      self.subscriber_сount, self.video_count, self.view_сount))
+        attribute_values = {
+            'channel_id': self.channel_id,
+            'title': self.title,
+            'description': self.description,
+            'url': self.url,
+            'subscriber_count': self.subscriber_сount,
+            'video_count': self.video_count,
+            'view_count': self.view_сount
+        }
 
-        with open("moscowpython.json", "w") as f:
-            json.dump(Channel.attribute_values, f)
+        with open("moscowpython.json", "w", encoding='utf-8') as f:
+            json.dump(attribute_values, f)
