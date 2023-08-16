@@ -79,12 +79,3 @@ class Channel:
 
         with open(file_name, "w", encoding='utf-8') as f:
             json.dump(attribute_values, f, indent=4, ensure_ascii=False)
-
-
-# highload = Channel('UCwHL6WHUarjGfUM_586me8w')
-# print(highload.subscriber_сount)
-#
-# moscowpython = Channel('UC-OVMPlMA3-YCIeg4z5z23A')
-# print(moscowpython.subscriber_сount)
-#
-# print(moscowpython + highload)
