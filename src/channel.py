@@ -12,13 +12,37 @@ class Channel:
         self.__channel_id = channel_id
         self.init_from_api()
 
+    def __str__(self):
+        return f'{self.title} ({self.url})'
+
+    def __add__(self, other):
+        return int(self.subscriber_сount) + int(other.subscriber_сount)
+
+    def __sub__(self, other):
+        return int(self.subscriber_сount) - int(other.subscriber_сount)
+
+    def __gt__(self, other):
+        return int(self.subscriber_сount) > int(other.subscriber_сount)
+
+    def __ge__(self, other):
+        return int(self.subscriber_сount) >= int(other.subscriber_сount)
+
+    def __lt__(self, other):
+        return int(self.subscriber_сount) < int(other.subscriber_сount)
+
+    def __le__(self, other):
+        return int(self.subscriber_сount) < int(other.subscriber_сount)
+
+    def __eq__(self, other):
+        return int(self.subscriber_сount) == int(other.subscriber_сount)
+
     @property
     def channel_id(self):
         return self.__channel_id
 
-    @channel_id.setter
-    def channel_id(self, value):
-        self.__channel_id = value
+    # @channel_id.setter
+    # def channel_id(self, value):
+    #     self.__channel_id = value
 
     def init_from_api(self):
         youtube = self.get_service()
@@ -55,3 +79,12 @@ class Channel:
 
         with open(file_name, "w", encoding='utf-8') as f:
             json.dump(attribute_values, f, indent=4, ensure_ascii=False)
+
+
+# highload = Channel('UCwHL6WHUarjGfUM_586me8w')
+# print(highload.subscriber_сount)
+#
+# moscowpython = Channel('UC-OVMPlMA3-YCIeg4z5z23A')
+# print(moscowpython.subscriber_сount)
+#
+# print(moscowpython + highload)
