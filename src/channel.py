@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 
 class Channel:
     """Класс для ютуб-канала"""
-    api_key: str = os.getenv('API_KEY')
+    api_key: str = os.getenv('YOUTUBE_API_KEY')
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
@@ -53,6 +53,16 @@ class Channel:
         self.subscriber_сount = channel['items'][0]['statistics']['subscriberCount']
         self.video_count = channel['items'][0]['statistics']['videoCount']
         self.view_сount = channel['items'][0]['statistics']['viewCount']
+
+    @property
+    def url(self):
+        """Возвращает ссылку на канал."""
+        return f"https://www.youtube.com/channel/{self.__channel_id}"
+
+
+    @url.setter
+    def url(self, value):
+        self.__url = value
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
