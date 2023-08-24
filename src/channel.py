@@ -49,20 +49,10 @@ class Channel:
         channel = youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
         self.title = channel['items'][0]['snippet']['title']
         self.description = channel['items'][0]['snippet']['description']
-        self.url = channel['items'][0]['snippet']['thumbnails']['default']['url']
+        self.url = f"https://www.youtube.com/channel/{self.__channel_id}"
         self.subscriber_сount = channel['items'][0]['statistics']['subscriberCount']
         self.video_count = channel['items'][0]['statistics']['videoCount']
         self.view_сount = channel['items'][0]['statistics']['viewCount']
-
-    @property
-    def url(self):
-        """Возвращает ссылку на канал."""
-        return f"https://www.youtube.com/channel/{self.__channel_id}"
-
-
-    @url.setter
-    def url(self, value):
-        self.__url = value
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
