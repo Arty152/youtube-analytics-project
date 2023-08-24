@@ -8,13 +8,13 @@ class PlayList(Channel):
     """
     Класс для представления YouTube плейлиста.
     Этот класс предоставляет функциональность для работы с плейлистами на YouTube. Он наследует методы и
-    функциональность от класса Channel, который, вероятно, содержит методы для взаимодействия с YouTube API.
+    функциональность от класса Channel, который, содержит методы для взаимодействия с YouTube API.
     """
 
     def __init__(self, playlist_id):
         """
-        Инициализация объекта PlayList.
-        :param playlist_id: Идентификатор плейлиста на YouTube.
+        Экземпляр инициализируется id плейлиста.
+        :param playlist_id: ID плейлиста на YouTube.
         """
         self.playlist_id = playlist_id
         self.title = self.get_playlists_data()['items'][0]['snippet']['title']
@@ -38,7 +38,7 @@ class PlayList(Channel):
                                                           part='contentDetails',
                                                           maxResults=50).execute()
 
-    def set_list(self):
+    def set_list_video(self):
         """
         Формирование списка видео в плейлисте.
         :return: Список объектов PLVideo.
@@ -54,7 +54,7 @@ class PlayList(Channel):
         :return: Список с данными о видео.
         """
         list_id = []
-        for video in self.set_list():
+        for video in self.set_list_video():
             list_id.append(video.video_id)
         data_items = Channel.get_service().videos().list(part='contentDetails,statistics',
                                                          id=','.join(list_id)).execute()
