@@ -1,3 +1,5 @@
+from src.channel import APIMixin
+
 class Video(APIMixin):
     """Класс для работы с видео из ютуба."""
 
