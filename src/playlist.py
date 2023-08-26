@@ -1,91 +1,83 @@
-from src.channel import Channel
-from src.video import PLVideo
+from src.channel import APIMixin
 import datetime
 import isodate
 
 
-class PlayList(Channel):
+class PlayList(APIMixin):
+    """Класс для работы в плейлистами на YouTube.
+    Attributes:
+        title (str): Название плейлиста.
+        url (str): Ссылка на плейлист на YouTube.
     """
-    Класс для представления YouTube плейлиста.
-    Этот класс предоставляет функциональность для работы с плейлистами на YouTube. Он наследует методы и
-    функциональность от класса Channel, который, содержит методы для взаимодействия с YouTube API.
-    """
 
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_id: str) -> None:
         """
-        Экземпляр инициализируется id плейлиста.
-        :param playlist_id: ID плейлиста на YouTube.
+        Инициализирует ID плейлиста и результатами запроса по API.
+        Args:
+            playlist_id: ID плейлиста.
         """
-        self.playlist_id = playlist_id
-        self.title = self.get_playlists_data()['items'][0]['snippet']['title']
-        self.url = f'https://www.youtube.com/playlist?list={self.playlist_id}'
+        self.__playlist_id = playlist_id
+        self._init_from_api()
 
-    def get_playlists_data(self):
-        """
-        Получение данных о плейлисте.
-        :return: Словарь с данными о плейлисте.
-        """
-        return Channel.get_service().playlists().list(id=self.playlist_id,
-                                                      part='contentDetails,snippet',
-                                                      maxResults=50).execute()
+    def _init_from_api(self) -> None:
+        """Получаем данные по API и инициализируем ими экземпляр класса."""
+        playlist_info = self.get_service().playlists().list(id=self.__playlist_id,
+                                                            part='snippet').execute()
+        self.title = playlist_info['items'][0]['snippet']['title']
+        self.url = f'https://www.youtube.com/playlist?list={self.__playlist_id}'
 
-    def get_video_data(self):
-        """
-        Получение данных о видео в плейлисте.
-        :return: Словарь с данными о видео.
-        """
-        return Channel.get_service().playlistItems().list(playlistId=self.playlist_id,
-                                                          part='contentDetails',
-                                                          maxResults=50).execute()
+    def _get_playlist_videos(self) -> dict:
+        """Получает ответ API на запрос всех видео плейлиста.
+        Returns:
+            dict: Ответ API на запрос всех видео плейлиста."""
+        return self.get_service().playlistItems().list(playlistId=self.__playlist_id,
+                                                       part='contentDetails',
+                                                       maxResults=50).execute()
 
-    def set_list_video(self):
+    def set_list_video(self) -> list:
         """
-        Формирование списка видео в плейлисте.
-        :return: Список объектов PLVideo.
+        Формирует список ID видео в плейлисте.
+        Returns:
+            list: Список ID видео.
         """
         list_video = []
-        for video in self.get_video_data()['items']:
-            list_video.append(PLVideo(video['contentDetails']['videoId'], self.playlist_id))
+        [list_video.append(video['contentDetails']['videoId']) for video in self._get_playlist_videos()['items']]
         return list_video
 
-    def get_duration_playlist(self):
+    def get_duration_playlist(self) -> dict:
         """
-        Получение данных о длительности видео в плейлисте.
-        :return: Список с данными о видео.
+        Получает данные о длительности видео в плейлисте.
+        Returns:
+            dict: Информация о длительности видео.
         """
-        list_id = []
-        for video in self.set_list_video():
-            list_id.append(video.video_id)
-        data_items = Channel.get_service().videos().list(part='contentDetails,statistics',
-                                                         id=','.join(list_id)).execute()
-        return data_items['items']
+        list_ids = self.set_list_video()
+        return self.get_service().videos().list(part='contentDetails,statistics',
+                                                id=','.join(list_ids)).execute()
 
     @property
-    def total_duration(self):
+    def total_duration(self) -> datetime.timedelta:
         """
-        Вычисление общей длительности плейлиста.
-        :return: Общая длительность плейлиста.
+        Возвращает суммарную длительность плейлиста в формате 'datetime.timedelta' (hh:mm:ss).
+        Returns:
+            datetime.timedelta: Суммарная длительность плейлиста.
         """
-        total_duration = datetime.timedelta(0)
-        for video in self.get_duration_playlist():
-            duration = isodate.parse_duration(video['contentDetails']['duration'])
-            total_duration += duration
-        return total_duration
+        return sum([isodate.parse_duration(video['contentDetails']['duration'])
+                    for video in self.get_duration_playlist()['items']], datetime.timedelta())
+        # datetime.timedelta()
+        # for video in self.get_duration_playlist()['items']:
+        #     duration += isodate.parse_duration(video['contentDetails']['duration'])
+        # return duration
 
-    def show_best_video(self):
+    def show_best_video(self) -> str:
         """
         Поиск и вывод наилучшего видео по количеству лайков.
         :return: URL наилучшего видео.
         """
         like_count = 0
-        best_video_id = None
-        for video in self.get_duration_playlist():
+        for video in self.get_duration_playlist()['items']:
             max_like = int(video['statistics']['likeCount'])
             if max_like > like_count:
                 like_count = max_like
-                best_video_id = video['id']
-        if best_video_id:
+        if video['id']:
             return f"https://youtu.be/{video['id']}"
         return None
-
-

@@ -1,23 +1,31 @@
-from src.channel import Channel
+class Video(APIMixin):
+    """Класс для работы с видео из ютуба."""
 
+    def __init__(self, video_id: str) -> None:
+        """Видео инициализируется id и далее через API"""
+        self.__video_id = video_id
+        self._init_from_api()
 
-class Video:
-    def __init__(self, video_id):
-        self.video_id = video_id
-        video_response = Channel.get_service().videos().list(part='snippet,statistics,contentDetails,topicDetails',
-                                                             id=video_id
-                                                             ).execute()
-        self.video_title: str = video_response['items'][0]['snippet']['title']
-        self.view_count: int = video_response['items'][0]['statistics']['viewCount']
-        self.like_count: int = video_response['items'][0]['statistics']['likeCount']
-        self.comment_count: int = video_response['items'][0]['statistics']['commentCount']
-        self.url: str = f'https://youtu.be/{self.video_id}'
+    def _init_from_api(self):
+        """Получаем данные по API и инициализируем ими экземпляр класса."""
+        video_response = self.get_service().videos().list(part='snippet,statistics',
+                                                          id=self.__video_id
+                                                          ).execute()
 
-    def __str__(self):
-        return f'{self.video_title}'
+        self.title = video_response['items'][0]['snippet']['title']
+        self.url = f'https://youtu.be/{self.__video_id}'
+        self.view_count = video_response['items'][0]['statistics']['viewCount']
+        self.like_count = video_response['items'][0]['statistics']['likeCount']
+
+    def __str__(self) -> str:
+        """Шаблон: <название_видео>."""
+        return self.title
 
 
 class PLVideo(Video):
-    def __init__(self, video_id, playlist_id):
+    """Класс для видео, у которого есть плейлист."""
+
+    def __init__(self, video_id: str, plist_id: str) -> None:
+        """Инициализируется id видео и плейлиста."""
         super().__init__(video_id)
-        self.playlist_id = playlist_id
+        self.plist_id = plist_id
